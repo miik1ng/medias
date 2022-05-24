@@ -127,7 +127,7 @@ public class MediasLayout extends LinearLayout {
     public List<NewMedia> getData() {
         List<NewMedia> temList = new ArrayList<>();
         for (MediasBean bean : newList) {
-            temList.add(new NewMedia(bean.getLocalMedia().getPath(), bean.getLocalMedia().getMimeType()));
+            temList.add(new NewMedia(bean.getLocalMedia().getRealPath(), bean.getLocalMedia().getMimeType()));
         }
         return temList;
     }
