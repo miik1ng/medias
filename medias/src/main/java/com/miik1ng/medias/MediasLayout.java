@@ -42,6 +42,9 @@ public class MediasLayout extends LinearLayout {
     public static final int TYPE_SHOW = 0;
     public static final int TYPE_ADD = 1;
 
+    public static final String IMAGE_JPEG = "image/jpeg";
+    public static final String VIDEO_MP$ = "video/mp4";
+
     private MediasGridAdapter adapter;
     private PopupWindow pop;
     private Activity activity;

@@ -105,10 +105,13 @@ public class MediasGridAdapter extends RecyclerView.Adapter<MediasGridAdapter.Vi
             }
 
             long duration = media.getDuration();
-            holder.tvDuration.setVisibility(PictureMimeType.isHasVideo(media.getMimeType())
+//            holder.tvDuration.setVisibility(PictureMimeType.isHasVideo(media.getMimeType())
+//                    ? View.VISIBLE : View.GONE);
+//            holder.tvDuration.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.picture_icon_video, 0, 0, 0);
+//            holder.tvDuration.setText(DateUtils.formatDurationTime(duration));
+
+            holder.mIvPlay.setVisibility(PictureMimeType.isHasVideo(media.getMimeType())
                     ? View.VISIBLE : View.GONE);
-            holder.tvDuration.setCompoundDrawablesRelativeWithIntrinsicBounds(R.drawable.picture_icon_video, 0, 0, 0);
-            holder.tvDuration.setText(DateUtils.formatDurationTime(duration));
             Glide.with(holder.itemView.getContext())
                     .load(PictureMimeType.isContent(path) && !media.isCut() && !media.isCompressed() ? Uri.parse(path) : path)
 //                    .centerCrop()
@@ -164,12 +167,14 @@ public class MediasGridAdapter extends RecyclerView.Adapter<MediasGridAdapter.Vi
 
         ImageView mImg;
         ImageView mIvDel;
+        ImageView mIvPlay;
         TextView tvDuration;
 
         public ViewHolder(View view) {
             super(view);
             mImg = view.findViewById(R.id.fiv);
             mIvDel = view.findViewById(R.id.iv_del);
+            mIvPlay = view.findViewById(R.id.iv_play);
             tvDuration = view.findViewById(R.id.tv_duration);
         }
     }
