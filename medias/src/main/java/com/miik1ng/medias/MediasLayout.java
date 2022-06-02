@@ -3,6 +3,8 @@ package com.miik1ng.medias;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.util.AttributeSet;
@@ -18,20 +20,15 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.luck.picture.lib.animators.AnimationType;
 import com.luck.picture.lib.basic.PictureSelector;
-import com.luck.picture.lib.config.PictureConfig;
-import com.luck.picture.lib.config.PictureMimeType;
 import com.luck.picture.lib.config.SelectMimeType;
 import com.luck.picture.lib.decoration.GridSpacingItemDecoration;
 import com.luck.picture.lib.entity.LocalMedia;
 import com.luck.picture.lib.interfaces.OnResultCallbackListener;
-import com.luck.picture.lib.style.PictureWindowAnimationStyle;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Mi on 2022/5/10
@@ -53,6 +50,7 @@ public class MediasLayout extends LinearLayout {
     private List<MediasBean> originalList = new ArrayList<>();
     private List<MediasBean> newList = new ArrayList<>();
     private OnMediasListener onMediasListener;
+    private WaterMaskListener waterMaskListener;
 
     public MediasLayout(Context context) {
         this(context, null);
@@ -105,32 +103,6 @@ public class MediasLayout extends LinearLayout {
             }
         }
     };
-
-    public void setType(int type) {
-        adapter.setLayoutType(type);
-        adapter.notifyDataSetChanged();
-    }
-
-    public void setData(List<NewMedia> list) {
-        if (list == null) return;
-        for (NewMedia media : list) {
-            LocalMedia localMedia = new LocalMedia();
-            localMedia.setMimeType(media.getType());
-            localMedia.setPath(media.getPath());
-            originalList.add(new MediasBean(localMedia, true));
-        }
-        tidyData();
-        adapter.setData(mediaList);
-        adapter.notifyDataSetChanged();
-    }
-
-    public List<NewMedia> getData() {
-        List<NewMedia> temList = new ArrayList<>();
-        for (MediasBean bean : newList) {
-            temList.add(new NewMedia(bean.getLocalMedia().getRealPath(), bean.getLocalMedia().getMimeType()));
-        }
-        return temList;
-    }
 
     private void tidyData() {
         mediaList.clear();
@@ -201,10 +173,19 @@ public class MediasLayout extends LinearLayout {
         @SuppressLint("NotifyDataSetChanged")
         @Override
         public void onResult(ArrayList<LocalMedia> result) {
+            if (waterMaskListener != null) {
+                LocalMedia localMedia = result.get(0);
+                if (localMedia.getMimeType().startsWith("image")) {
+                    Bitmap bitmap = BitmapFactory.decodeFile(localMedia.getRealPath());
+                    Bitmap b = WaterMaskUtil.drawTextToLeftBottom(getContext(), bitmap, waterMaskListener.getWaterMask(), 10, Color.WHITE, 5, 5);
+                    WaterMaskUtil.saveBitmap(getContext(), b, localMedia.getRealPath());
+                }
+            }
+
             newList.add(new MediasBean(result.get(0), false));
             tidyData();
             if (onMediasListener != null) {
-                onMediasListener.setMedias(new NewMedia(result.get(0).getPath(), result.get(0).getMimeType()));
+                onMediasListener.setMedias(new NewMedia(result.get(0).getRealPath(), result.get(0).getMimeType()));
             }
 
             if (adapterWeakReference.get() != null) {
@@ -235,7 +216,62 @@ public class MediasLayout extends LinearLayout {
         void setMedias(NewMedia newMedia);
     }
 
+    public interface WaterMaskListener{
+        String getWaterMask();
+    }
+
+    /*******************外放API**********************/
+    /**
+     * 设置布局类型
+     * @param type
+     */
+    public void setType(int type) {
+        adapter.setLayoutType(type);
+        adapter.notifyDataSetChanged();
+    }
+
+    /**
+     * 设置原始展示数据
+     * @param list
+     */
+    public void setData(List<NewMedia> list) {
+        if (list == null) return;
+        for (NewMedia media : list) {
+            LocalMedia localMedia = new LocalMedia();
+            localMedia.setMimeType(media.getType());
+            localMedia.setPath(media.getPath());
+            originalList.add(new MediasBean(localMedia, true));
+        }
+        tidyData();
+        adapter.setData(mediaList);
+        adapter.notifyDataSetChanged();
+    }
+
+    /**
+     * 获取新添加的数据
+     * @return
+     */
+    public List<NewMedia> getData() {
+        List<NewMedia> temList = new ArrayList<>();
+        for (MediasBean bean : newList) {
+            temList.add(new NewMedia(bean.getLocalMedia().getRealPath(), bean.getLocalMedia().getMimeType()));
+        }
+        return temList;
+    }
+
+    /**
+     * 添加单个数据监听
+     * @param listener
+     */
     public void setOnMediasListener(OnMediasListener listener) {
         this.onMediasListener = listener;
+    }
+
+    /**
+     * 添加水印文字信息
+     * @param listener
+     */
+    public void addWaterMaskListener(WaterMaskListener listener) {
+        this.waterMaskListener = listener;
     }
 }
