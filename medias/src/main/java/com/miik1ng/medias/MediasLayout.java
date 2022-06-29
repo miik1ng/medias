@@ -42,6 +42,8 @@ public class MediasLayout extends LinearLayout {
     public static final String IMAGE_JPEG = "image/jpeg";
     public static final String VIDEO_MP4 = "video/mp4";
 
+    private int maxSecond = 10;
+
     private MediasGridAdapter adapter;
     private PopupWindow pop;
     private Activity activity;
@@ -137,6 +139,7 @@ public class MediasLayout extends LinearLayout {
             public void onClick(View v) {
                 PictureSelector.create(getContext())
                         .openCamera(SelectMimeType.ofImage())
+                        .setOutputCameraDir(String.valueOf(getContext().getFilesDir()))
                         .forResult(new ResultCallback(adapter));
 
                 closePop();
@@ -147,8 +150,9 @@ public class MediasLayout extends LinearLayout {
             public void onClick(View v) {
                 PictureSelector.create(activity)
                         .openCamera(SelectMimeType.ofVideo())
-                        .setRecordVideoMaxSecond(10)
-                        .setRecordVideoMinSecond(5)
+                        .setRecordVideoMaxSecond(maxSecond)
+                        .setRecordVideoMinSecond(0)
+                        .setOutputCameraDir(String.valueOf(getContext().getFilesDir()))
                         .forResult(new ResultCallback(adapter));
                 closePop();
             }
@@ -177,8 +181,10 @@ public class MediasLayout extends LinearLayout {
                 LocalMedia localMedia = result.get(0);
                 if (localMedia.getMimeType().startsWith("image")) {
                     Bitmap bitmap = BitmapFactory.decodeFile(localMedia.getRealPath());
-                    Bitmap b = WaterMaskUtil.drawTextToLeftBottom(getContext(), bitmap, waterMaskListener.getWaterMask(), 10, Color.WHITE, 5, 5);
-                    WaterMaskUtil.saveBitmap(getContext(), b, localMedia.getRealPath());
+                    if (bitmap != null) {
+                        Bitmap b = WaterMaskUtil.drawTextToLeftBottom(getContext(), bitmap, waterMaskListener.getWaterMask(), 10, Color.WHITE, 5, 5);
+                        WaterMaskUtil.saveBitmap(getContext(), b, localMedia.getRealPath());
+                    }
                 }
             }
 
@@ -245,6 +251,10 @@ public class MediasLayout extends LinearLayout {
         tidyData();
         adapter.setData(mediaList);
         adapter.notifyDataSetChanged();
+    }
+
+    public void setVideoMaxSecond(int maxSecond) {
+        this.maxSecond = maxSecond;
     }
 
     /**

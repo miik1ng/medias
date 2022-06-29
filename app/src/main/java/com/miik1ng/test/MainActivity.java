@@ -31,6 +31,13 @@ public class MainActivity extends AppCompatActivity {
                 list.add(new NewMedia("https://zhjs.ysb.qz.gov.cn/iResources/img/jpg/home_banner1.png", "image/jpeg"));
                 //list.add(new NewMedia("https://zhjs.ysb.qz.gov.cn/iResources/img/jpg/home_banner1.png", "video/mp4"));
                 mediasLayout.setData(list);
+                mediasLayout.setVideoMaxSecond(5);
+                mediasLayout.addWaterMaskListener(new MediasLayout.WaterMaskListener() {
+                    @Override
+                    public String getWaterMask() {
+                        return "水印";
+                    }
+                });
             }
         });
     }
